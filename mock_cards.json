@@ -1,0 +1,29 @@
+[
+    {
+        "id": "OP01-001",
+        "name": "Roronoa Zoro",
+        "type": "Leader",
+        "colors": ["Red"],
+        "cost": 0,
+        "power": 5000,
+        "traits": ["Supernovas", "Straw Hat Crew"]
+    },
+    {
+        "id": "OP01-025",
+        "name": "Roronoa Zoro",
+        "type": "Character",
+        "colors": ["Red"],
+        "cost": 3,
+        "power": 5000,
+        "traits": ["Supernovas", "Straw Hat Crew"]
+    },
+    {
+        "id": "OP01-016",
+        "name": "Nami",
+        "type": "Character",
+        "colors": ["Red"],
+        "cost": 1,
+        "power": 2000,
+        "traits": ["Straw Hat Crew"]
+    }
+]
