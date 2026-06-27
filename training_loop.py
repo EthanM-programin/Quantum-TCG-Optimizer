@@ -59,7 +59,7 @@ def train_model():
 
     # Save the 'Brain' to your drive so we don't need to retrain.
     torch.save(model.state_dict(), "trained_evaluator.pth")
-    print("Model saved as 'trained_evaluator.ph'")
+    print("Model saved as 'trained_evaluator.pth'")
 
 if __name__ == "__main__":
     train_model()

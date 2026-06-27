@@ -73,8 +73,20 @@ def run_hybrid_optimization():
             print(f"Epoch [{epoch+1:02d}/50] | Deck Score: {synergy_score.item():.4f} | Loss: {loss.item():.4f}")
 
     print("\nOptimization Complete...")
-    print("Final Quantum Angles:", initial_angles.detach().numpy())
-    print("The Quantum Circuit has successfully learned to generate the perfect meta deck.")
+    
+    # Extract the raw numbers from the PyTorch tensors
+    final_angles_list = initial_angles.detach().numpy().tolist()
+    final_score = synergy_score.item()
+    final_loss = loss.item()
+
+    # Hand them back as a dictionary
+    return {
+        "final_angles": final_angles_list,
+        "synergy_score": final_score,
+        "loss": final_loss
+    }
 
 if __name__ == "__main__":
-    run_hybrid_optimization()
+    # This keeps the script testable in the terminal
+    results = run_hybrid_optimization()
+    print(results)

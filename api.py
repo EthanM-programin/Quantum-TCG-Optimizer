@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import asyncio
+
+# Import custom quantum engine.
+from hybrid_loop import run_hybrid_optimization
 
 app = FastAPI()
 
@@ -18,14 +20,15 @@ def read_root():
     return {"message": "Quantum API is online..."}
 
 @app.get("/optimize")
-async def run_optimization():
-    # This simulates the 5-second wait of your Python script.
-    # This will connect the hybrid_loop logic.
-    await asyncio.sleep(5)
+def run_optimization():
+   
+    # 1. Trigger PyTorch/PennyLane engine
+    result = run_hybrid_optimization()
 
+    # 2. Package the real results and send them to the React UI
     return {
         "status": "Optimization Complete",
-        "final_angles": [0.01138, -0.01167, 0.03096, 0.01192],
-        "synergy_score": 0.5592,
-        "loss": 0.4408
+        "final_angles": result["final_angles"],
+        "synergy_score": result["synergy_score"],
+        "loss": result["loss"]
     }
