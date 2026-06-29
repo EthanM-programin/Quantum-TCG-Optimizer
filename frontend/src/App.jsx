@@ -15,44 +15,39 @@ export default function App() {
   const [metrics, setMetrics] = useState({ score: 0.0, loss: 1.0 });
   const [quantumAngles, setQuantumAngles] = useState([0, 0, 0, 0]);
 
-  // Simulate the Python Hybrid Loop
-  useEffect(() => {
-    let interval;
-    if(isOptimizing && epoch < 49) {
-      interval = setInterval(() => {
-        setEpoch(prev => prev + 1);
-      }, 100); // Speed of simulation
-    }
-    return () => clearInterval(interval);
-  }, [isOptimizing, epoch]);
-
   // Real API Call
-  const handleStart = async () => {
+  const handleStart = () => {
     setIsOptimizing(true);
     setIsComplete(false);
     setEpoch(0);
     setMetrics({ score: 0.0, loss: 1.0 });
     setQuantumAngles([0, 0, 0, 0]);
 
-    try {
-      // 1. Send request to FastAPI server
-      const response = await fetch("http://127.0.0.1:8000/optimize");
-      const data = await response.json();
+    // 1. Dial the FastAPI WebSocket
+    const ws = new WebSocket("ws://127.0.0.1:8000/stream");
 
-      // 2. Inject the real Python results into your React UI.
+    // 2. When Python 'yields', this function runs
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      // Inject live data directly into the DOM
+      setEpoch(data.epoch);
       setMetrics({ score: data.synergy_score, loss: data.loss });
-      setQuantumAngles(data.final_angles);
+      setQuantumAngles(data.angles);
+    };
 
-      // 3. Snap the progress bar to 100% and show the deck
-      setEpoch(50);
+    // 3. Handle any connection errors
+    ws.onerror = (error) => {
+      console.error("WebSocket Error:", error);
+      alert("Stream failed, is the FastAPI server running?");
+      setIsOptimizing(false);
+    };
+
+    // 4. When Python hits 50 epochs and hangs up, finalize the UI
+    ws.onclose = () => {
       setIsOptimizing(false);
       setIsComplete(true);
-
-    } catch(error) {
-      console.error("API Connection Error:", error);
-      alert("Failed to connect to Python backend, is the server running?")
-      setIsOptimizing(false);
-    }
+    };
   };
 
   return (

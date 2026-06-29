@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
+import asyncio
 
 # Import custom quantum engine.
 from hybrid_loop import run_hybrid_optimization
@@ -19,16 +20,20 @@ app.add_middleware(
 def read_root():
     return {"message": "Quantum API is online..."}
 
-@app.get("/optimize")
-def run_optimization():
-   
-    # 1. Trigger PyTorch/PennyLane engine
-    result = run_hybrid_optimization()
+# WebSocket Endpoint
+@app.websocket("/stream")
+async def stream_optimization(websocket: WebSocket):
+    # 1. Accept the live connection from React
+    await websocket.accept()
 
-    # 2. Package the real results and send them to the React UI
-    return {
-        "status": "Optimization Complete",
-        "final_angles": result["final_angles"],
-        "synergy_score": result["synergy_score"],
-        "loss": result["loss"]
-    }
+    # 2. Start the PyTorch engine and listen to it
+    for live_data in run_hybrid_optimization():
+
+        # 3. Beam the data straight to the browser
+        await websocket.send_json(live_data)
+
+        # 0.05s pause so the browser has time to render the visual changes
+        await asyncio.sleep(0.05)
+
+    # 4. Close when 50 epochs are finished
+    await websocket.close()

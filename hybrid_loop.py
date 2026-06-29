@@ -72,21 +72,18 @@ def run_hybrid_optimization():
         if(epoch + 1) % 5 == 0:
             print(f"Epoch [{epoch+1:02d}/50] | Deck Score: {synergy_score.item():.4f} | Loss: {loss.item():.4f}")
 
-    print("\nOptimization Complete...")
-    
-    # Extract the raw numbers from the PyTorch tensors
-    final_angles_list = initial_angles.detach().numpy().tolist()
-    final_score = synergy_score.item()
-    final_loss = loss.item()
-
-    # Hand them back as a dictionary
-    return {
-        "final_angles": final_angles_list,
-        "synergy_score": final_score,
-        "loss": final_loss
-    }
+        # Yield the live data every single epoch.
+        # No 'return' statement outside the loop.
+        yield {
+            "epoch": epoch + 1,
+            "synergy_score": synergy_score.item(),
+            "loss": loss.item(),
+            "angles": initial_angles.detach().numpy().tolist()
+        }
 
 if __name__ == "__main__":
-    # This keeps the script testable in the terminal
-    results = run_hybrid_optimization()
-    print(results)
+    # This is now a generator, we'll test it using a loop that prints once.
+    for live_data in run_hybrid_optimization():
+        # This will print the stream locally in the terminal 50 times
+        pass # (We use pass here so it doesn't flood the terminal, since print statement is at Step F)
+    print("\nLocal Generator Test Complete...")
