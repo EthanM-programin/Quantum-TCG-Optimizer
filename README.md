@@ -1,44 +1,45 @@
-# ⚡ Quantum TCG Optimizer
+Quantum TCG Optimizer ⚡️⚛️
 
-A decoupled, full-stack machine learning application designed to calculate and optimize high-synergy deck compositions for the One Piece Trading Card Game. 
+A Hybrid Quantum-Classical Machine Learning engine designed to evaluate, optimize, and simulate Trading Card Game (TCG) meta-strategies using PyTorch and PennyLane.
 
-This project bridges the gap between AI Game Development and Quantum Information Science by utilizing a hybrid classical-quantum machine learning backend to evaluate complex game states.
+🧠 System Architecture
 
-## 🏗️ Architecture
+This project is a decoupled, real-time distributed system featuring:
 
-* **Frontend (Presentation Layer):** React, Vite, Tailwind CSS, Lucide React
-* **Middleware (REST API Bridge):** Python, FastAPI, Uvicorn
-* **Backend (Quantum-Classical Engine):** PyTorch, PennyLane (VQC)
+Frontend (React/Vite): A dynamic telemetry dashboard providing live visualizations of optimization epochs, loss gradients, and quantum state vectors.
 
-## 🗺️ Development Roadmap
+Backend API (FastAPI): A high-performance Python server utilizing WebSockets for continuous, non-blocking bidirectional data streaming.
 
-### Phase 1: The Engine Room (✅ Current State)
-* Constructed a Variational Quantum Circuit (VQC) using PennyLane to generate parameterized deck states.
-* Engineered a PyTorch Neural Network (`DeckEvaluatorNet`) trained on mock game data to act as an algorithmic "Judge" for deck synergy.
-* Built a FastAPI middleware layer to decouple the UI from the heavy tensor calculations.
-* Designed a responsive React dashboard to visualize quantum measurements and telemetry in real-time.
+Classical ML (PyTorch): A Deep Neural Network acting as a "Meta Judge," evaluating the combinatorial synergy of deck inputs based on pre-trained weights.
 
-### Phase 2: The Live Stream (Next Steps)
-* Upgrade the FastAPI HTTP endpoints to **WebSockets**.
-* Broadcast internal loop calculations (Epochs, Loss, Synergy Score) during the 50-epoch optimization run so the UI updates fluidly in real-time before finalizing the deck.
+Quantum ML (PennyLane): A parameterized quantum circuit utilizing rotation operations and entanglement (CNOT) to explore massive combinatorial spaces via superposition.
 
-### Phase 3: The Reinforcement Arena (Future)
-* Introduce an Adversarial AI model.
-* Create a localized "Arena" environment where an Aggro PyTorch agent and a Control PyTorch agent dynamically adjust their qubit rotation angles to counter each other's meta strategies.
+⚔️ The Reinforcement Arena (Multi-Agent Simulation)
 
-### Phase 4: The Quantum Leap (Future)
-* Integrate cloud-based quantum hardware (e.g., IBM Quantum backend).
-* Transition the local PennyLane simulator to run optimization requests on an actual physical superconducting quantum processor.
-* Containerize and deploy the application via Docker.
+The core feature of this application is a live Multi-Agent Reinforcement Learning (MARL) environment.
 
----
+Two distinct PyTorch optimizers represent competing TCG strategies (Aggro vs. Control). They engage in a zero-sum, adversarial loop where:
 
-## 🚀 How to Run the Application
+Agent A adjusts its quantum parameters to maximize raw power output.
 
-This system requires two separate local servers to operate the decoupled architecture.
+Agent B adjusts its parameters to maximize counter-meta efficiency.
 
-### 1. Start the React Frontend
-Open a terminal, navigate to the frontend directory, and spin up the Vite server:
-```bash
-cd frontend
-npm run dev
+The system calculates the differential and broadcasts the shifting win-probabilities in real-time to the React dashboard over an open WebSocket channel.
+
+🚀 Getting Started
+
+Prerequisites
+
+Node.js & npm
+
+Python 3.10+
+
+pip install torch pennylane fastapi uvicorn websockets
+
+Running the Ecosystem
+
+Boot the Frontend: Navigate to /frontend and run npm run dev.
+
+Boot the Backend: Navigate to the root directory and run python -m uvicorn api:app --reload.
+
+Access the Dashboard: Open http://localhost:5173 in your browser and initialize the Hybrid Loop.
