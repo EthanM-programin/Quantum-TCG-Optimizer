@@ -1,89 +1,49 @@
-import torch
-import torch.optim as optim
 import pennylane as qml
+import torch
 from evaluator_net import DeckEvaluatorNet
 
+# 1. Initialize a 4-qubit simulator
+dev = qml.device("default.qubit", wires=4)
+
+# 2. Define the starting quantum parameters (angles)
+angles = torch.tensor([0.0, 0.0, 0.0, 0.0], requires_grad=True)
+
+@qml.qnode(dev, interface="torch")
+def quantum_circuit(params):
+    # Standard QML ansatz mapping parameters to quantum states
+    for i in range(4):
+        qml.RX(params[i], wires=i)
+    qml.CNOT(wires=[0, 1])
+    qml.CNOT(wires=[2, 3])
+    # Return expectation values for each qubit position
+    return [qml.expval(qml.PauliZ(i)) for i in range(4)]
+
+# The explicit function arena_loop.py is trying to import
+def generate_strategy(params):
+    return quantum_circuit(params)
+
+# Legacy support for the original Phase 2 optimization engine if needed
 def run_hybrid_optimization():
-    print("Initializing Hybrid Quantum-Classical System")
-
-    # 1. Load Classical Judge
-    TOTAL_CARD_POOL = 500
-    judge = DeckEvaluatorNet(TOTAL_CARD_POOL)
-    judge.load_state_dict(torch.load("trained_evaluator.pth", weights_only=True))
-
-    # Critical Step: Freeze the Judge
-    # To train the Quantum Circuit, not retrain the AI.
-    for param in judge.parameters():
-        param.requires_grad = False
-    judge.eval()
-
-    # 2. Setup the Quantum Generator
-    NUM_QUBITS = 4
-    dev = qml.device("default.qubit", wires=NUM_QUBITS)
-
-    # We explicitly tell PennyLane to interface with PyTorch
-    @qml.qnode(dev, interface="torch")
-    def quantum_deck_generator(weights):
-        for i in range(NUM_QUBITS):
-            qml.RX(weights[i], wires=i)
-        for i in range(NUM_QUBITS - 1):
-            qml.CNOT(wires=[i, i + 1])
-        return [qml.expval(qml.PauliZ(i)) for i in range(NUM_QUBITS)]
+    # Fast classical evaluation mapping back to our upgraded 104-card net
+    import torch.optim as optim
+    opt = optim.Adam([angles], lr=0.1)
     
-    # 3. Hybrid Training Setup
-    # Create random starting angles, but tell PyTorch they are trainable variables.
-    initial_angles = torch.rand(NUM_QUBITS, requires_grad=True)
-
-    # Use Adam optimizer, but this time it is tuning the Quantum Angles,
-    # not AI weights
-    optimizer = optim.Adam([initial_angles], lr=0.1)
-
-    print("Commencing Quantum Parameter Optimization\n")
-
-    EPOCHS = 50
-    for epoch in range(EPOCHS):
-        # Clear out old math
-        optimizer.zero_grad()
-
-        # Step A: QUantum Circuit generates raw states (-1.0 to 1.0)
-        raw_quantum_state = quantum_deck_generator(initial_angles)
-
-        # Step B: Convert the 4 quantum measurements to a PyTorch tensor
-        # and map them to a 0.0 to 1.0 probability range
-        q_tensor = torch.stack(raw_quantum_state)
-        probabilties = (q_tensor + 1.0) / 2.0
-
-        # Step C: Pad the 4 quantum cards to match the 500-card AI input
-        # Put our 4 qubits into the first 4 "Meta" card slots.
-        deck_input = torch.zeros(1, TOTAL_CARD_POOL)
-        deck_input[0, 0:NUM_QUBITS] = probabilties
-
-        # Step D: AI Judges the Quantum Deck
-        synergy_score = judge(deck_input)
-
-        # Step E: Calculate Loss
-        # To maximize the score, we minimize the distance to 1.0
-        loss = 1.0 - synergy_score
+    epoch = 0
+    while epoch < 100:
+        opt.zero_grad()
+        raw_outputs = generate_strategy(angles)
+        prob_dist = (torch.stack(raw_outputs) + 1.0) / 2.0
         
-        # Step F: Backpropagate through the AI *and* into the Quantum Circuit.
+        # Evaluate using the upgraded network
+        from evaluator_net import referee
+        loss = 1.0 - referee(prob_dist)
+        
         loss.backward()
-        optimizer.step()
-
-        if(epoch + 1) % 5 == 0:
-            print(f"Epoch [{epoch+1:02d}/50] | Deck Score: {synergy_score.item():.4f} | Loss: {loss.item():.4f}")
-
-        # Yield the live data every single epoch.
-        # No 'return' statement outside the loop.
+        opt.step()
+        
         yield {
             "epoch": epoch + 1,
-            "synergy_score": synergy_score.item(),
             "loss": loss.item(),
-            "angles": initial_angles.detach().numpy().tolist()
+            "angles": [a.item() for a in angles]
         }
-
-if __name__ == "__main__":
-    # This is now a generator, we'll test it using a loop that prints once.
-    for live_data in run_hybrid_optimization():
-        # This will print the stream locally in the terminal 50 times
-        pass # (We use pass here so it doesn't flood the terminal, since print statement is at Step F)
-    print("\nLocal Generator Test Complete...")
+        epoch += 1

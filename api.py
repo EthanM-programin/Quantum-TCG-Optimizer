@@ -30,7 +30,15 @@ async def stream_optimization(websocket: WebSocket):
 @app.websocket("/arena-stream")
 async def stream_arena(websocket: WebSocket):
     await websocket.accept()
-    for live_data in run_arena_battle():
-        await websocket.send_json(live_data)
-        await asyncio.sleep(0.08) # Slightly slower so we can watch the fight play out!
-    await websocket.close()
+    print("DEBUG: Connection accepted!")
+    try:
+        # Use a list to ensure we are iterating through the generator
+        for live_data in run_arena_battle():
+            print(f"DEBUG: Streaming data: {live_data}")
+            await websocket.send_json(live_data)
+            await asyncio.sleep(0.5) # Increased delay to make it easier to see
+    except Exception as e:
+        print(f"DEBUG: Error in stream: {e}")
+    finally:
+        print("DEBUG: Connection closed")
+        await websocket.close()
