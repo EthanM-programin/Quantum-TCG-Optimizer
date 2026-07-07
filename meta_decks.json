@@ -1,0 +1,22 @@
+{
+  "deck_name": "Yamato Wano Meta",
+  "leader": "Yamato (OP16-079)",
+  "main_deck": [
+    { "name": "OP16-079", "count": 1 },
+    { "name": "OP16-091", "count": 4 },
+    { "name": "OP16-092", "count": 4 },
+    { "name": "OP16-081", "count": 2 },
+    { "name": "OP16-087", "count": 4 },
+    { "name": "OP16-088", "count": 3 },
+    { "name": "OP16-095", "count": 1 },
+    { "name": "OP16-082", "count": 4 },
+    { "name": "OP16-084", "count": 4 },
+    { "name": "OP16-098", "count": 4 },
+    { "name": "OP16-086", "count": 2 },
+    { "name": "OP16-096", "count": 4 },
+    { "name": "OP16-097", "count": 4 },
+    { "name": "OP16-085", "count": 4 },
+    { "name": "OP14-096", "count": 2 },
+    { "name": "OP16-099", "count": 4 }
+  ]
+}

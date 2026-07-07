@@ -6,20 +6,20 @@ export default function App() {
   const [isBattling, setIsBattling] = useState(false);
   const [round, setRound] = useState(0);
   const [aiCommand, setAiCommand] = useState(null);
+  const [boardState, setBoardState] = useState(null);
+  const [announcement, setAnnouncement] = useState("");
 
   const startArenaBattle = () => {
     setIsBattling(true);
-    
-    // Connect to the Python Backend
     const ws = new WebSocket("ws://localhost:8000/arena-stream");
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       setRound(data.epoch);
-  
-      // Extract just the action string
-      if (data.ai_command && data.ai_command.action) {
-        setAiCommand(data.ai_command.action);
+      setBoardState(data.board_state);
+      setAnnouncement(data.announcement);
+      if (data.ai_command) {
+        setAiCommand(data.ai_command);
       }
     };
 
@@ -59,8 +59,11 @@ export default function App() {
         </div>
       </div>
 
-      {/* Pass the command to the board */}
-      <Playmat aiCommand={aiCommand} />
+      <Playmat 
+        aiCommand={aiCommand} 
+        boardState={boardState} 
+        announcement={announcement} 
+      />
     </div>
   );
 }
